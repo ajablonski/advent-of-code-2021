@@ -1,5 +1,6 @@
 package com.github.ajablonski
 
+import com.github.ajablonski.day_2.{Down, Forward, Position, Up}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

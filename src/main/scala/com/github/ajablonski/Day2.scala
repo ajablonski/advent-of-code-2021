@@ -1,5 +1,7 @@
 package com.github.ajablonski
 
+import com.github.ajablonski.day_2.{Down, Forward, Movement, Position, Up}
+
 object Day2 extends AocProblem {
   override def part1(filename: String): Int = {
     val finalPosition =
@@ -28,26 +30,3 @@ object Day2 extends AocProblem {
       }
   }
 }
-
-
-case class Position(horizontal: Int, depth: Int, aim: Int = 0) {
-  def advance(movement: Movement): Position = movement match {
-    case Forward(change) => Position(horizontal + change, depth)
-    case Down(change) => Position(horizontal, depth + change)
-    case Up(change) => Position(horizontal, depth - change)
-  }
-
-  def advanceWithAim(movement: Movement): Position = movement match {
-    case Forward(change) => Position(horizontal + change, depth + change * aim, aim)
-    case Down(change) => Position(horizontal, depth, aim + change)
-    case Up(change) => Position(horizontal, depth, aim - change)
-  }
-}
-
-sealed trait Movement
-
-case class Forward(change: Int) extends Movement
-
-case class Down(change: Int) extends Movement
-
-case class Up(change: Int) extends Movement
