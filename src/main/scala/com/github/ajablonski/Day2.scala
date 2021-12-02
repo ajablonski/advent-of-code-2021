@@ -19,15 +19,13 @@ object Day2 extends AocProblem {
 
   def parse(lines: Iterator[String]): Iterator[Movement] = {
     lines
-      .map(_.split(" "))
-      .map(tokens => {
-        val change = tokens(1).toInt
-        tokens(0) match {
-          case "forward" => Forward(change)
-          case "up" => Up(change)
-          case "down" => Down(change)
+      .map {
+        _.split(" ") match {
+          case Array("forward", change: String) => Forward(change.toInt)
+          case Array("up", change: String) => Up(change.toInt)
+          case Array("down", change: String) => Down(change.toInt)
         }
-      })
+      }
   }
 }
 
