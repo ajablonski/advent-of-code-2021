@@ -8,14 +8,10 @@ object Day1 extends AocProblem {
   }
 
   def part2(filename: String): Int = {
-    val lines = parseInput(filename)
-
-    countIncreases(
-      lines.drop(2)
-        .zip(lines.drop(1))
-        .map(_ + _)
-        .zip(lines)
-        .map(_ + _))
+    countIncreases(parseInput(filename)
+      .sliding(3)
+      .map(_.sum)
+      .toList)
   }
 
   def parseInput(filename: String): Seq[Int] = getRawData(filename).map(_.toInt)
