@@ -19,7 +19,7 @@ object Day2 extends AocProblem {
     finalPosition.depth * finalPosition.horizontal
   }
 
-  def parse(lines: Iterator[String]): Iterator[Movement] = {
+  def parse(lines: Seq[String]): Seq[Movement] = {
     lines
       .map {
         _.split(" ") match {

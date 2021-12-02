@@ -9,7 +9,7 @@ import scala.io.Source
 
 class Day1Test extends flatspec.AnyFlatSpec with should.Matchers {
   "parsing input" should "read in input into list of strings" in {
-    Day1.parseInput(getClass.getResource("/samples/day1.txt").getFile).toList shouldEqual
+    Day1.parseInput(getClass.getResource("/samples/day1.txt").getFile) shouldEqual
       List(199, 200, 208, 210, 200, 207, 240, 269, 260, 263)
   }
 

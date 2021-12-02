@@ -18,11 +18,11 @@ object Day1 extends AocProblem {
         .map(_ + _))
   }
 
-  def parseInput(filename: String): List[Int] = getRawData(filename).map(_.toInt).toList
-  
-  private def countIncreases(ints: List[Int]): Int = {
+  def parseInput(filename: String): Seq[Int] = getRawData(filename).map(_.toInt)
+
+  private def countIncreases(ints: Seq[Int]): Int = {
     ints.sliding(2)
-      .count { case List(next, prev) => next > prev }
+      .count { case Seq(prev, next) => next > prev }
   }
 
 }

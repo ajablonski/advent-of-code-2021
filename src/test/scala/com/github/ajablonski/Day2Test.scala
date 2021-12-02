@@ -51,6 +51,6 @@ class Day2Test extends AnyFlatSpec with Matchers {
       "forward 2",
       "down 10",
       "up 1"
-    ).iterator).toSeq shouldEqual Seq(Forward(2), Down(10), Up(1))
+    )) shouldEqual Seq(Forward(2), Down(10), Up(1))
   }
 }
