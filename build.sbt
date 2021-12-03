@@ -1,5 +1,4 @@
-
-name := "aoc-2021"
+name := "advent-of-code-2021"
 
 version := "0.1"
 
