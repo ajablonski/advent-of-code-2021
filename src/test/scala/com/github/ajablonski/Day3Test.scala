@@ -53,10 +53,10 @@ class Day3Test extends AnyFlatSpec with Matchers {
   }
 
   "parse raw input" should "return sequent of maps with bit counts counts by position" in {
-    Day3.parse(Seq(
+    Day3.getBitCountsByIndex(Seq(
       "000",
       "111",
       "010"
-    )) shouldBe Seq(Map("0" -> 2, "1" -> 1), Map("0" -> 1, "1" -> 2), Map("0" -> 2, "1" -> 1))
+    )) shouldBe Seq(Map('0' -> 2, '1' -> 1), Map('0' -> 1, '1' -> 2), Map('0' -> 2, '1' -> 1))
   }
 }

@@ -14,71 +14,43 @@ object Day3 extends AocProblem {
     oxygenGeneratorRating(inputData) * co2ScrubberRating(inputData)
   }
 
-  def gamma(lines: Seq[String]): Int = {
-    Integer.parseInt(findMostCommonBits(lines).mkString, 2)
-  }
+  def gamma(lines: Seq[String]): Int =
+    Integer.parseInt(getBitCountsByIndex(lines).map(selectByMostCommonBit).mkString, 2)
 
-  private def findMostCommonBits(lines: Seq[String]): Seq[String] =
-    parse(lines).map(bitCountMap => bitCountMap.maxBy(_._2)._1)
+  def epsilon(lines: Seq[String]): Int =
+    Integer.parseInt(getBitCountsByIndex(lines).map(selectByLeastCommonBit).mkString, 2)
 
-  def epsilon(lines: Seq[String]): Int = {
-    Integer.parseInt(findLeastCommonBits(lines).mkString, 2)
-  }
+  def oxygenGeneratorRating: Seq[String] => Int =
+    filterNumbersBasedOnBitCountCriteria(selectByMostCommonBit)(0)
 
-  private def findLeastCommonBits(lines: Seq[String]): Seq[String] = {
-    parse(lines).map(bitCountMap => bitCountMap.minBy(_._2)._1)
-  }
+  def co2ScrubberRating: Seq[String] => Int =
+    filterNumbersBasedOnBitCountCriteria(selectByLeastCommonBit)(0)
 
-  @tailrec
-  def oxygenGeneratorRating(input: Seq[String], bitIndex: Int = 0): Int = {
-    if (input.length == 1) {
-      Integer.parseInt(input.head, 2)
-    } else {
-      val bitCounts = input.map(_(bitIndex)).groupMapReduce(identity)(_ => 1)(_ + _)
-      val mostCommonBit = if (bitCounts.size == 1) {
-        bitCounts.head._1
-      } else if (bitCounts('0') > bitCounts('1')) {
-        '0'
-      } else {
-        '1'
-      }
-      oxygenGeneratorRating(input.filter(_.apply(bitIndex) == mostCommonBit), bitIndex + 1)
-    }
-  }
 
-  @tailrec
-  def co2ScrubberRating(input: Seq[String], bitIndex: Int = 0): Int = {
-    if (input.length == 1) {
-      Integer.parseInt(input.head, 2)
-    } else {
-      val bitCounts = input.map(_(bitIndex)).groupMapReduce(identity)(_ => 1)(_ + _)
-      val leastCommonBit = if (bitCounts.size == 1) {
-        bitCounts.head._1
-      } else if (bitCounts('0') <= bitCounts('1')) {
-        '0'
-      } else {
-        '1'
-      }
-      co2ScrubberRating(input.filter(_.apply(bitIndex) == leastCommonBit), bitIndex + 1)
-    }
-  }
-
-  def parse(input: Seq[String]): Seq[Map[String, Int]] = {
-    val flatMapped = input.flatMap(line => line.zipWithIndex)
-    val grouped = flatMapped
-      .groupBy { case (char, index) => index }
-    val mapped = grouped
-      .map { case (bitIndex, values) =>
-        (bitIndex,
-          values
-            .groupBy(_._1)
-            .map { case (bitValue, entries) => (bitValue.toString, entries.length) })
-      }
-    val sorted = mapped
+  def getBitCountsByIndex(input: Seq[String]): Seq[Map[Char, Int]] = {
+    input.flatMap(line => line.zipWithIndex)
+      .groupMapReduce(identity)(_ => 1)(_ + _)
+      .groupMapReduce({ case ((char, index), count) => index })({ case ((char, index), count) => Map(char -> count) })({ case (mapA, mapB) => mapA ++ mapB })
       .toSeq
-      .sortBy(_._1)
-    val lastMapped = sorted
-      .map(_._2)
-    lastMapped
+      .sortBy { case (index, _) => index }
+      .map { case (_, bitCountMap) => bitCountMap }
+  }
+
+  private val selectByMostCommonBit: Map[Char, Int] => Char =
+    bitCounts => bitCounts.maxBy { case (char, count) => (count, char) }._1
+  private val selectByLeastCommonBit: Map[Char, Int] => Char =
+    bitCounts => bitCounts.minBy { case (char, count) => (count, char) }._1
+
+  @tailrec
+  private def filterNumbersBasedOnBitCountCriteria(bitSelectionCriteria: Map[Char, Int] => Char)
+                                                  (bitIndex: Int)
+                                                  (input: Seq[String]): Int = {
+    if (input.length == 1) {
+      Integer.parseInt(input.head, 2)
+    } else {
+      val bitCounts = input.groupMapReduce(line => line(bitIndex))(_ => 1)(_ + _)
+      val bitToSelect = bitSelectionCriteria(bitCounts)
+      filterNumbersBasedOnBitCountCriteria(bitSelectionCriteria)(bitIndex + 1)(input.filter(line => line(bitIndex) == bitToSelect))
+    }
   }
 }
