@@ -105,13 +105,18 @@ case class HorizontalLine(y: Int, minX: Int, maxX: Int) extends Line {
 }
 
 case class DiagonalLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int) extends Line {
-  def pointsOnLine: Seq[(Int, Int)] = {
-    (xStart to xEnd).zip(yStart.to(yEnd, (yEnd - yStart) / Math.abs(yEnd - yStart)))
-  }
-
   override def containsPoint(point: (Int, Int)): Boolean = {
     point match {
-      case (pointX, pointY) => pointsOnLine.contains((pointX, pointY))
+      case (pointX, pointY) =>
+        if (yEnd < yStart) {
+          xStart <= pointX && pointX <= xEnd
+            && yEnd <= pointY && pointY <= yStart
+            && (pointY + pointX) == (xStart + yStart)
+        } else {
+          xStart <= pointX && pointX <= xEnd
+            && yStart <= pointY && pointY <= yEnd
+            && (pointY - pointX) == (yStart - xStart)
+        }
     }
   }
 }
