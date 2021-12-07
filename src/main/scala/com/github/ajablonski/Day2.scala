@@ -2,7 +2,7 @@ package com.github.ajablonski
 
 import com.github.ajablonski.day_2.{Down, Forward, Movement, Position, Up}
 
-object Day2 extends AocProblem {
+object Day2 extends AocProblem[Int] {
   override def part1(filename: String): Int = {
     val finalPosition =
       parse(this.getRawData(filename))

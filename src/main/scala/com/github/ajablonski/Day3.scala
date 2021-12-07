@@ -2,7 +2,7 @@ package com.github.ajablonski
 
 import scala.annotation.tailrec
 
-object Day3 extends AocProblem {
+object Day3 extends AocProblem[Int] {
   override def part1(filename: String): Int = {
     val inputData = getRawData(filename)
     gamma(inputData) * epsilon(inputData)

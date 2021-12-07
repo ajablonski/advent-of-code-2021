@@ -2,7 +2,7 @@ package com.github.ajablonski
 
 import com.github.ajablonski.day_5.{DiagonalLine, HorizontalLine, Line, Seafloor, VerticalLine}
 
-object Day5 extends AocProblem {
+object Day5 extends AocProblem[Int] {
   override def part1(filename: String): Int = {
     val lines = parse(getRawData(filename))
     lines

@@ -2,7 +2,7 @@ package com.github.ajablonski
 
 import scala.io.Source
 
-object Day1 extends AocProblem {
+object Day1 extends AocProblem[Int] {
   def part1(filename: String): Int = {
     countIncreases(parseInput(filename))
   }

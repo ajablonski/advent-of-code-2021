@@ -50,7 +50,6 @@ case class Seafloor(floor: Seq[Seq[Int]]) {
   }
 
   def markWithDiagonals(line: Line): Seafloor = {
-    println(s"Processing line $line")
     val newFloor = floor.zipWithIndex
       .map { case (row, y) =>
         row
