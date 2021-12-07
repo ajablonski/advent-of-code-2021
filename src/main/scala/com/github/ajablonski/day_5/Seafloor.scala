@@ -1,19 +1,20 @@
 package com.github.ajablonski.day_5
 
 case class Seafloor(floor: Seq[Seq[Int]]) {
-  private def addRows(rowsToAdd: Int): Seafloor = {
-    Seafloor(floor :++ Seq.fill(rowsToAdd)(Seq.fill(floor.head.size)(0)))
+
+  private def addRows(rowsToAdd: Int): Seq[Seq[Int]] = {
+    floor :++ Seq.fill(rowsToAdd)(Seq.fill(floor.head.size)(0))
   }
 
-  private def addColumns(columnsToAdd: Int): Seafloor = {
-    Seafloor(floor.map(row => row :++ Seq.fill(columnsToAdd)(0)))
+  private def addColumns(columnsToAdd: Int): Seq[Seq[Int]] = {
+    floor.map(row => row :++ Seq.fill(columnsToAdd)(0))
   }
 
   private def rowsToAdd(line: Line): Int = {
     line match {
       case HorizontalLine(y, _, _) => Math.max(0, y - (floor.size - 1))
       case VerticalLine(_, _, maxY) => Math.max(0, maxY - (floor.size - 1))
-      case DiagonalLine(_, _, _, _) => 0
+      case DiagonalLine(_, y1, _, y2) => (y1 - (floor.size - 1)) max (y2 - (floor.size - 1)) max 0
     }
   }
 
@@ -21,47 +22,40 @@ case class Seafloor(floor: Seq[Seq[Int]]) {
     line match {
       case HorizontalLine(_, _, maxX) => Math.max(0, maxX - (floor.head.size - 1))
       case VerticalLine(x, _, _) => Math.max(0, x - (floor.head.size - 1))
-      case DiagonalLine(_, _, _, _) => 0
+      case DiagonalLine(x1, _, x2, _) => (x1 - (floor.head.size - 1)) max (x2 - (floor.head.size - 1)) max 0
     }
   }
 
-  def mark(line: Line): Seafloor = {
-    if (rowsToAdd(line) > 0) {
-      addRows(rowsToAdd(line))
-        .mark(line)
-    } else if (columnsToAdd(line) > 0) {
-      addColumns(columnsToAdd(line))
-        .mark(line)
-    } else {
-      val newFloor = floor.zipWithIndex
-        .map { case (row, y) =>
-          row
-            .zipWithIndex
-            .map { case (ventCount, x) =>
-              line match {
-                case hl: HorizontalLine => if (hl.containsPoint((x, y))) ventCount + 1 else ventCount
-                case vl: VerticalLine => if (vl.containsPoint((x, y))) ventCount + 1 else ventCount
-                case DiagonalLine(_, _, _, _) => ventCount
-              }
-            }
-        }
-      Seafloor(newFloor)
-    }
+  def resizeFloor(line: Line): Seq[Seq[Int]] = {
+    val rowsToAddCount = rowsToAdd(line)
+    val columnsToAddCount = columnsToAdd(line)
+
+    val resizedWithRows = if (rowsToAddCount > 0) addRows(rowsToAddCount) else floor
+    val resizedWithCols = if (columnsToAddCount > 0) addColumns(columnsToAddCount) else resizedWithRows
+
+    resizedWithCols
   }
 
-  def markWithDiagonals(line: Line): Seafloor = {
-    val newFloor = floor.zipWithIndex
+  def mark(line: Line, handleDiagonals: Boolean = false): Seafloor = {
+    val newFloor = resizeFloor(line)
+      .zipWithIndex
       .map { case (row, y) =>
         row
           .zipWithIndex
           .map { case (ventCount, x) =>
-            if (line.containsPoint((x, y))) ventCount + 1 else ventCount
+            line match {
+              case l: (HorizontalLine | VerticalLine) => if (l.containsPoint((x, y))) ventCount + 1 else ventCount
+              case l: DiagonalLine if handleDiagonals => if (l.containsPoint((x, y))) ventCount + 1 else ventCount
+              case _ => ventCount
+            }
           }
       }
     Seafloor(newFloor)
   }
 
-
+  def markWithDiagonals(line: Line): Seafloor = {
+    mark(line, true)
+  }
 }
 
 object Seafloor {
@@ -79,43 +73,5 @@ object Seafloor {
         Seq.fill(maxX + 1)(0)
       )
     )
-  }
-}
-
-
-sealed trait Line {
-  def containsPoint(point: (Int, Int)): Boolean
-}
-
-case class VerticalLine(x: Int, minY: Int, maxY: Int) extends Line {
-  override def containsPoint(point: (Int, Int)): Boolean = {
-    point match {
-      case (pointX, pointY) => pointX == x && minY <= pointY && pointY <= maxY
-    }
-  }
-}
-
-case class HorizontalLine(y: Int, minX: Int, maxX: Int) extends Line {
-  override def containsPoint(point: (Int, Int)): Boolean = {
-    point match {
-      case (pointX, pointY) => pointY == y && minX <= pointX && pointX <= maxX
-    }
-  }
-}
-
-case class DiagonalLine(xStart: Int, yStart: Int, xEnd: Int, yEnd: Int) extends Line {
-  override def containsPoint(point: (Int, Int)): Boolean = {
-    point match {
-      case (pointX, pointY) =>
-        if (yEnd < yStart) {
-          xStart <= pointX && pointX <= xEnd
-            && yEnd <= pointY && pointY <= yStart
-            && (pointY + pointX) == (xStart + yStart)
-        } else {
-          xStart <= pointX && pointX <= xEnd
-            && yStart <= pointY && pointY <= yEnd
-            && (pointY - pointX) == (yStart - xStart)
-        }
-    }
   }
 }
