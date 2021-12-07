@@ -1,40 +1,40 @@
 package com.github.ajablonski
 
 object Day7 extends AocProblem[Int] {
+  val part1CostFunction: (Int, Int) => Int = (index: Int, finalIndex: Int) => {
+    Math.abs(finalIndex - index)
+  }
+  
+  val part2CostFunction: (Int, Int) => Int = (index: Int, finalIndex: Int) => {
+    val n = Math.abs(finalIndex - index)
+    n * (n + 1) / 2
+  }
+  
   override def part1(filename: String): Int = {
-    val positions = getRawData(filename).head.split(",").map(_.toInt).sorted
-    val median = if (positions.length % 2 == 0) {
-      (positions(positions.length / 2) + positions(positions.length / 2 - 1)) / 2
-    } else {
-      positions(positions.length / 2)
-    }
-
-    positions
-      .map(position => Math.abs(position - median))
-      .sum
+    minimizeCost(filename, part1CostFunction)
   }
 
   override def part2(filename: String): Int = {
+    minimizeCost(filename, part2CostFunction)
+  }
+
+  private def minimizeCost(filename: String, costFunction: (Int, Int) => Int): Int = {
     val positions = getRawData(filename).head.split(",").map(_.toInt)
-    val positionsMap = buildPositionList(positions)
+    val positionsMap = buildPositionsMap(positions)
 
     (positions.min to positions.max)
-      .map(finalPosition => calculateTotalCost(positionsMap, finalPosition))
+      .map(finalPosition => calculateTotalCost(costFunction)(positionsMap, finalPosition))
       .min
   }
 
-  def buildPositionList(initialPositions: Seq[Int]): Map[Int, Int] = {
+  def buildPositionsMap(initialPositions: Seq[Int]): Map[Int, Int] = {
     initialPositions
       .groupMapReduce(identity)(_ => 1)(_ + _)
   }
 
-  def calculateTotalCost(positionMap: Map[Int, Int], finalPosition: Int): Int = {
+  def calculateTotalCost(costingFunction: (Int, Int) => Int)(positionMap: Map[Int, Int], finalPosition: Int): Int = {
     positionMap
-      .map {
-        case (index, count) =>
-          val n = Math.abs(finalPosition - index)
-          count * n * (n + 1) / 2
-      }
+      .map { case (index, count) => count * costingFunction(index, finalPosition) }
       .sum
   }
 }
