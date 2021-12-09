@@ -3,6 +3,8 @@ package com.github.ajablonski
 import scala.annotation.tailrec
 
 object Day9 extends AocProblem[Int] {
+  private val MaxDepth = 9
+
   override def part1(filename: String): Int = {
     val depthMap = parse(getRawData(filename))
     findLowPoints(depthMap)
@@ -15,12 +17,10 @@ object Day9 extends AocProblem[Int] {
   override def part2(filename: String): Int = {
     val depthMap = parse(getRawData(filename))
 
-    val basins = findLowPoints(depthMap)
+    findLowPoints(depthMap)
       .map(basin => {
-        expandBasin(Set(basin), depthMap)
+        expandBasin(Set(basin), depthMap).size
       })
-    basins
-      .map(_.size)
       .toSeq
       .sorted(Ordering.Int.reverse)
       .take(3)
@@ -32,8 +32,8 @@ object Day9 extends AocProblem[Int] {
     val newEntries = basin
       .flatMap(entry => {
         findAdjacentPoints(entry._1, depthMap)
-          .filter(_._2 < 9)
-      }) -- basin
+          .filter(_._2 < MaxDepth)
+      })
 
     if (newEntries.subsetOf(basin)) {
       basin
@@ -43,12 +43,13 @@ object Day9 extends AocProblem[Int] {
   }
 
   def findAdjacentPoints(point: (Int, Int), depthMap: Map[(Int, Int), Int]): Set[((Int, Int), Int)] = {
+    val (row, col) = point
     Set(
-      (point._1 - 1, point._2),
-      (point._1 + 1, point._2),
-      (point._1, point._2 - 1),
-      (point._1, point._2 + 1),
-    ).map(p => (p, depthMap.getOrElse(p, 10)))
+      (row - 1, col),
+      (row + 1, col),
+      (row, col - 1),
+      (row, col + 1),
+    ).map(p => (p, depthMap.getOrElse(p, MaxDepth)))
   }
 
   def parse(lines: Seq[String]): Map[(Int, Int), Int] = {
@@ -64,15 +65,11 @@ object Day9 extends AocProblem[Int] {
       .toMap
   }
 
-  private def findLowPoints(depthMap: Map[(Int, Int), Int]) = {
+  private def findLowPoints(depthMap: Map[(Int, Int), Int]): Map[(Int, Int), Int] = {
     depthMap
       .filter {
-        case ((row, col), depth) =>
-          depth < (
-            depthMap.getOrElse((row - 1, col), 10) min
-              depthMap.getOrElse((row + 1, col), 10) min
-              depthMap.getOrElse((row, col - 1), 10) min
-              depthMap.getOrElse((row, col + 1), 10))
+        case (point, depth) =>
+          depth < findAdjacentPoints(point, depthMap).map(_._2).min
       }
   }
 }
