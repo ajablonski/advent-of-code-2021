@@ -113,7 +113,7 @@ class DigitFindersTest extends AnyFlatSpec with Matchers {
   }
 
   "findAll" should "return mapping of numbers to segment sets" in {
-    DigitFinders.findAll(digitCombinations, Map()) shouldBe Map(
+    DigitFinders.findAll(digitCombinations) shouldBe Map(
       0 -> Set("e", "f", "a", "b", "g", "d"),
       5 -> Set("e", "f", "g", "c", "d"),
       1 -> Set("b", "e"),

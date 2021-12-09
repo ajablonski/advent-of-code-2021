@@ -17,7 +17,7 @@ object Day8 extends AocProblem[Int] {
 
   def decodeLine(line: String): String = {
     val (allSegmentCombinations, outputSegmentCombinations) = parseLine(line)
-    translateOutput(outputSegmentCombinations, DigitFinders.findAll(allSegmentCombinations, Map()))
+    translateOutput(outputSegmentCombinations, DigitFinders.findAll(allSegmentCombinations))
   }
 
   def parseLine(line: String): (Set[Set[String]], Seq[Set[String]]) = {

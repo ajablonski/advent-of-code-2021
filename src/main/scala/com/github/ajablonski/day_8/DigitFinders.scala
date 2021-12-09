@@ -1,10 +1,10 @@
 package com.github.ajablonski.day_8
 
 
-type DigitFunction = (Set[Set[String]], Map[Int, Set[String]]) => Map[Int, Set[String]]
-
 object DigitFinders {
-  def findAll: DigitFunction = (digitCombinations, knownDigits) => {
+  private type DigitFunction = (Set[Set[String]], Map[Int, Set[String]]) => Map[Int, Set[String]]
+
+  def findAll(digitCombinations: Set[Set[String]]): Map[Int, Set[String]] = {
     Seq(
       DigitFinders.find1,
       DigitFinders.find4,
@@ -15,8 +15,10 @@ object DigitFinders {
       DigitFinders.find3,
       DigitFinders.find2,
       DigitFinders.find5,
-      DigitFinders.find0,
-    ).foldLeft(knownDigits)((mapSoFar, nextDigitFunction) => nextDigitFunction(digitCombinations, mapSoFar))
+      DigitFinders.find0
+    ).foldLeft(Map[Int, Set[String]]())(
+      (mapSoFar, nextDigitFunction) => nextDigitFunction(digitCombinations, mapSoFar)
+    )
   }
 
   def find1: DigitFunction = (digitCombinations, knownDigits) => {
@@ -87,7 +89,7 @@ object DigitFinders {
       .find(combination => combination.size == 5 && combination.intersect(digit2Combination).size == 3)
       .get)
   }
-  
+
   def find0: DigitFunction = (digitCombinations, knownDigits) => {
     val digit6Combination = knownDigits
       .getOrElse(6, find6(digitCombinations, knownDigits)(6))
