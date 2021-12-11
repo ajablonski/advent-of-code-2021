@@ -2,9 +2,11 @@ package com.github.ajablonski
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import com.github.ajablonski.day_10._
 
 class Day10Test extends AnyFlatSpec with Matchers with AocTestData(10) {
-  import Chunk.stringToChunkChar
+
+  import com.github.ajablonski.day_10.Chunk.stringToChunkChar
 
   "part1" should "return total syntax error score" in {
     Day10.part1(inputFile) shouldBe 26397
