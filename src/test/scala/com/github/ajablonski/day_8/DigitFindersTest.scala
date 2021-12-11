@@ -37,6 +37,7 @@ class DigitFindersTest extends AnyFlatSpec with Matchers {
 
   it should "work when no previous mapping is provided" in {
     DigitFinders.find3(digitCombinations, Map()) shouldBe Map(
+      1 -> Set("b", "e"),
       3 -> Set("b", "c", "d", "e", "f")
     )
   }
@@ -52,6 +53,7 @@ class DigitFindersTest extends AnyFlatSpec with Matchers {
 
   it should "work when no previous mapping is provided" in {
     DigitFinders.find6(digitCombinations, Map()) shouldBe Map(
+      1 -> Set("b", "e"),
       6 -> Set("a", "c", "d", "e", "f", "g")
     )
   }
@@ -65,6 +67,7 @@ class DigitFindersTest extends AnyFlatSpec with Matchers {
 
   it should "work when no previous mapping is provided" in {
     DigitFinders.find9(digitCombinations, Map()) shouldBe Map(
+      4 -> Set("b", "c", "e", "g"),
       9 -> Set("b", "c", "d", "e", "f", "g")
     )
   }
@@ -78,8 +81,8 @@ class DigitFindersTest extends AnyFlatSpec with Matchers {
 
   it should "work when no previous mapping is provided" in {
     DigitFinders.find2(digitCombinations, Map()) shouldBe Map(
-      2 -> Set("a", "b", "c", "d", "f")
-    )
+      4 -> Set("b", "c", "e", "g"),
+      2 -> Set("a", "b", "c", "d", "f"))
   }
 
   "find5" should "find the 5-segment value whose intersection with 2 has size 3" in {
@@ -91,6 +94,8 @@ class DigitFindersTest extends AnyFlatSpec with Matchers {
 
   it should "work when no previous mapping is provided" in {
     DigitFinders.find5(digitCombinations, Map()) shouldBe Map(
+      2 -> Set("a", "b", "c", "d", "f"),
+      4 -> Set("b", "c", "e", "g"),
       5 -> Set("c", "d", "e", "f", "g")
     )
   }
@@ -109,6 +114,10 @@ class DigitFindersTest extends AnyFlatSpec with Matchers {
   it should "work when no previous mapping is provided" in {
     DigitFinders.find0(digitCombinations, Map()) shouldBe Map(
       0 -> Set("a", "b", "d", "e", "f", "g"),
+      1 -> Set("b", "e"),
+      4 -> Set("c", "g", "e", "b"),
+      6 -> Set("a", "c", "d", "e", "f", "g"),
+      9 -> Set("b", "c", "d", "e", "f", "g")
     )
   }
 
