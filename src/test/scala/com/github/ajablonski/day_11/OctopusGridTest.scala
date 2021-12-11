@@ -160,4 +160,34 @@ class OctopusGridTest extends AnyFlatSpec with Matchers {
         "6789998766"
       )), 1656)
   }
+  
+  "allSynced" should "indicate when a grid has all octopuses synced" in {
+    OctopusGrid.parse(Seq(
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000"
+    )).allSynced() shouldBe true
+  }
+  
+  it should "indicate when all octopuses are not synced" in {
+    OctopusGrid.parse(Seq(
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000090000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000",
+      "0000000000"
+    )).allSynced() shouldBe false
+  }
 }

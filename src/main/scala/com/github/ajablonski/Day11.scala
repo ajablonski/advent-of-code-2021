@@ -10,5 +10,8 @@ object Day11 extends AocProblem[Int] {
       
   }
 
-  override def part2(filename: String): Int = ???
+  override def part2(filename: String): Int = {
+    
+    OctopusGrid.findSyncedStep(OctopusGrid.parse(getRawData(filename)))
+  }
 }

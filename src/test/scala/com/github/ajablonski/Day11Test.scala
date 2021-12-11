@@ -10,6 +10,6 @@ class Day11Test extends AnyFlatSpec with Matchers with AocTestData(11) {
   }
 
   "part2" should "return the moment when all octopuses flash" in {
-    
+    Day11.part2(inputFile) shouldBe 195
   }
 }

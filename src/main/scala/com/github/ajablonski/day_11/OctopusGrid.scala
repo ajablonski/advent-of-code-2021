@@ -42,6 +42,10 @@ case class OctopusGrid(energyLevels: Map[(Int, Int), Int]) {
   }
 
 
+  def allSynced(): Boolean = {
+    energyLevels.forall(_._2 == 0)
+  }
+
   override def toString: String = {
     energyLevels
       .groupMap(_._1._1) { case ((rowNum, colNum), energyLevel) => (colNum, energyLevel)}
@@ -87,6 +91,15 @@ object OctopusGrid {
     } else {
       val (newGrid, flashes) = octopusGrid.step1()
       stepN(newGrid, iterations - 1, flashes + flashesSoFar)
+    }
+  }
+
+  @tailrec
+  def findSyncedStep(octopusGrid: OctopusGrid, iterationsSoFar: Int = 0): Int = {
+    if (octopusGrid.allSynced()) {
+      iterationsSoFar
+    } else {
+      findSyncedStep(octopusGrid.step1()._1, iterationsSoFar + 1)
     }
   }
 }
