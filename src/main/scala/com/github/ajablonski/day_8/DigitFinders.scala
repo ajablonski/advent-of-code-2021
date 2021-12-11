@@ -46,8 +46,7 @@ object DigitFinders {
   }
 
   def find3: DigitFunction = (digitCombinations, knownDigits) => {
-    val digit1Combination = knownDigits
-      .getOrElse(1, find1(digitCombinations, knownDigits)(1))
+    val digit1Combination = retrieveDigit(1, digitCombinations, knownDigits)
 
     knownDigits + (3 -> digitCombinations
       .find(combination => combination.size == 5 && digit1Combination.subsetOf(combination))
@@ -55,8 +54,7 @@ object DigitFinders {
   }
 
   def find6: DigitFunction = (digitCombinations, knownDigits) => {
-    val digit1Combination = knownDigits
-      .getOrElse(1, find1(digitCombinations, knownDigits)(1))
+    val digit1Combination = retrieveDigit(1, digitCombinations, knownDigits)
 
     knownDigits + (6 -> digitCombinations
       .find(combination => combination.size == 6 && !digit1Combination.subsetOf(combination))
@@ -64,8 +62,7 @@ object DigitFinders {
   }
 
   def find9: DigitFunction = (digitCombinations, knownDigits) => {
-    val digit4Combination = knownDigits
-      .getOrElse(4, find4(digitCombinations, knownDigits)(4))
+    val digit4Combination = retrieveDigit(4, digitCombinations, knownDigits)
 
     knownDigits + (9 -> digitCombinations
       .find(combination => combination.size == 6 && digit4Combination.subsetOf(combination))
@@ -73,8 +70,7 @@ object DigitFinders {
   }
 
   def find2: DigitFunction = (digitCombinations, knownDigits) => {
-    val digit4Combination = knownDigits
-      .getOrElse(4, find4(digitCombinations, knownDigits)(4))
+    val digit4Combination = retrieveDigit(4, digitCombinations, knownDigits)
 
     knownDigits + (2 -> digitCombinations
       .find(combination => combination.size == 5 && combination.intersect(digit4Combination).size == 2)
@@ -82,8 +78,7 @@ object DigitFinders {
   }
 
   def find5: DigitFunction = (digitCombinations, knownDigits) => {
-    val digit2Combination = knownDigits
-      .getOrElse(2, find2(digitCombinations, knownDigits)(2))
+    val digit2Combination = retrieveDigit(2, digitCombinations, knownDigits)
 
     knownDigits + (5 -> digitCombinations
       .find(combination => combination.size == 5 && combination.intersect(digit2Combination).size == 3)
@@ -91,13 +86,34 @@ object DigitFinders {
   }
 
   def find0: DigitFunction = (digitCombinations, knownDigits) => {
-    val digit6Combination = knownDigits
-      .getOrElse(6, find6(digitCombinations, knownDigits)(6))
-    val digit9Combination = knownDigits
-      .getOrElse(9, find9(digitCombinations, knownDigits)(9))
+    val digit6Combination = retrieveDigit(6, digitCombinations, knownDigits)
+    val digit9Combination = retrieveDigit(9, digitCombinations, knownDigits)
 
     knownDigits + (0 -> digitCombinations
       .find(combination => combination.size == 6 && combination != digit9Combination && combination != digit6Combination)
       .get)
+  }
+
+  private val digitFunctionMap: Map[Int, DigitFunction] = Map(
+    0 -> find0,
+    1 -> find1,
+    2 -> find2,
+    3 -> find3,
+    4 -> find4,
+    5 -> find5,
+    6 -> find6,
+    7 -> find7,
+    8 -> find8,
+    9 -> find9
+  )
+
+  private def retrieveDigit(digit: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+                            digitCombinations: Set[Set[String]],
+                            knownDigits: Map[Int, Set[String]]): Set[String] = {
+    val method = getClass
+      .getMethod(s"find$digit")
+    val instance = getClass.getDeclaredConstructor().newInstance()
+    knownDigits
+      .getOrElse(digit, digitFunctionMap(digit)(digitCombinations, knownDigits)(digit))
   }
 }
