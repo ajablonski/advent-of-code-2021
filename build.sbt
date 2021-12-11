@@ -11,3 +11,5 @@ fetch := {
   val dayToFetch = sbt.Def.spaceDelimited("<arg>").parsed.head.toInt
   TaskUtils.fetchData(dayToFetch, baseDirectory.value)
 }
+
+TaskUtils.defineAliases()
