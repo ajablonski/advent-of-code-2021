@@ -11,7 +11,7 @@ object Day1 extends AocProblem[Int] {
     countIncreases(parseInput(filename)
       .sliding(3)
       .map(_.sum)
-      .toList)
+      .toSeq)
   }
 
   def parseInput(filename: String): Seq[Int] = getRawData(filename).map(_.toInt)

@@ -1,21 +1,13 @@
 package com.github.ajablonski
 
 import scala.annotation.tailrec
+import com.github.ajablonski.day_10._
 
-
-type ChunkChar = ClosingChar | OpeningChar
-type ClosingChar = ']' | '}' | '>' | ')'
-type OpeningChar = '[' | '{' | '<' | '('
-
-object Chunk {
-  given stringToChunkChar: Conversion[String, List[ChunkChar]] =
-    _.toCharArray.toList.filter(_.isInstanceOf[ChunkChar]).map(_.asInstanceOf[ChunkChar])
-}
-
-case class ExpectedButWas(expected: ClosingChar, was: ClosingChar)
 
 object Day10 extends AocProblem[Long] {
-  import Chunk.stringToChunkChar
+
+  import com.github.ajablonski.day_10.Chunk.stringToChunkChar
+  import ChunkExtensions._
 
   override def part1(filename: String): Long = {
     getRawData(filename)
@@ -40,14 +32,14 @@ object Day10 extends AocProblem[Long] {
   }
 
   def scoreCorruption(expectedButWas: ExpectedButWas): Int = {
-    corruptionScoreMap(expectedButWas.was)
+    expectedButWas.was.getCorruptionScore
   }
 
   @tailrec
   def scoreCompletion(remainingSymbols: List[ClosingChar], scoreSoFar: Long = 0): Long = {
     remainingSymbols match {
       case Nil => scoreSoFar
-      case (head: ClosingChar) :: rest => scoreCompletion(rest, 5 * scoreSoFar + completionScoreMap(head))
+      case (head: ClosingChar) :: rest => scoreCompletion(rest, 5 * scoreSoFar + head.getCompletionScore)
     }
   }
 
@@ -56,7 +48,7 @@ object Day10 extends AocProblem[Long] {
                       expectedCharStack: List[ClosingChar] = List()): Either[ExpectedButWas, List[ClosingChar]] = {
     line match {
       case Nil => Right(expectedCharStack)
-      case (head: OpeningChar) :: tail => completeOrError(tail, completionCharMap(head) +: expectedCharStack)
+      case (head: OpeningChar) :: tail => completeOrError(tail, head.getClosingChar +: expectedCharStack)
       case (head: ClosingChar) :: tail =>
         if (expectedCharStack.head == head) {
           completeOrError(tail, expectedCharStack.tail)
@@ -65,26 +57,5 @@ object Day10 extends AocProblem[Long] {
         }
     }
   }
-
-  private val corruptionScoreMap: Map[ClosingChar, Int] = Map(
-    ')' -> 3,
-    ']' -> 57,
-    '}' -> 1197,
-    '>' -> 25137
-  )
-
-  private val completionCharMap: Map[OpeningChar, ClosingChar] = Map(
-    '(' -> ')',
-    '[' -> ']',
-    '{' -> '}',
-    '<' -> '>'
-  )
-
-  private val completionScoreMap: Map[ClosingChar, Int] = Map(
-    ')' -> 1,
-    ']' -> 2,
-    '}' -> 3,
-    '>' -> 4
-  )
 }
 
