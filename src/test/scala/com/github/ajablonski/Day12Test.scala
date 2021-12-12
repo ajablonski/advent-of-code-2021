@@ -2,7 +2,7 @@ package com.github.ajablonski
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import com.github.ajablonski.day_12.{Path, Connection}
+import com.github.ajablonski.day_12.{Cave, Connection, Path}
 
 
 
@@ -16,16 +16,18 @@ class Day12Test extends AnyFlatSpec with Matchers with AocTestData(12) {
     Day12.part2(inputFile) shouldBe 36
   }
 
-  "buildAdjacencyGraph" should "build map containing adjacent nodes"in {
+  "buildAdjacencyGraph" should "build map containing adjacent nodes" in {
+    import Cave.stringToCave
+
     Day12.buildAdjacencyMap(Seq(
       Connection("start", "A"),
       Connection("A", "b"),
       Connection("b", "end")
     )) shouldBe Map(
-      "start" -> Set("A"),
-      "A" -> Set("start", "b"),
-      "b" -> Set("A", "end"),
-      "end" -> Set("b")
+      Cave("start") -> Set(Cave("A")),
+      Cave("A") -> Set(Cave("start"), Cave("b")),
+      Cave("b") -> Set(Cave("A"), Cave("end")),
+      Cave("end") -> Set(Cave("b"))
     )
   }
 

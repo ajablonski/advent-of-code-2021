@@ -1,18 +1,18 @@
 package com.github.ajablonski.day_12
 
-case class Path private(private val nodes: Seq[String]) {
-  val lastNode: String = nodes.head
+case class Path private(private val nodes: Seq[Cave]) {
+  val lastNode: Cave = nodes.head
 
-  def addNode(node: String): Path = {
+  def addNode(node: Cave): Path = {
     Path(node +: nodes)
   }
 
-  def visited(node: String): Boolean = {
+  def visited(node: Cave): Boolean = {
     nodes.contains(node)
   }
 
-  def hasRevisitedSmallCave(): Boolean = {
-    nodes.filter(n => n.toLowerCase == n)
+  def hasRevisitedSmallCave: Boolean = {
+    nodes.filter(_.isSmall)
       .groupMapReduce(identity)(_ => 1)(_ + _)
       .exists(_._2 > 1)
   }
@@ -23,7 +23,7 @@ case class Path private(private val nodes: Seq[String]) {
 }
 
 object Path {
-  def build(nodes: String*): Path = {
+  def build(nodes: Cave*): Path = {
     new Path(nodes.reverse)
   }
 }

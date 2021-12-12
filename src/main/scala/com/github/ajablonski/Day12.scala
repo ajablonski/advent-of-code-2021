@@ -1,6 +1,6 @@
 package com.github.ajablonski
 
-import com.github.ajablonski.day_12.{Connection, Path}
+import com.github.ajablonski.day_12.{Connection, Path, Cave}
 
 import scala.annotation.tailrec
 
@@ -16,27 +16,26 @@ object Day12 extends AocProblem[Int] {
   def findPaths(connections: Seq[Connection], canRevisitOneSmallCave: Boolean = false): Set[Path] = {
     val adjacencyMap = buildAdjacencyMap(connections)
 
-    findPathsRecursive(Path.build("start"), adjacencyMap, canRevisitOneSmallCave)
+    buildPaths(Path.build("start"), adjacencyMap, canRevisitOneSmallCave)
   }
 
-  private def findPathsRecursive(pathSoFar: Path, adjacencyMap: Map[String, Set[String]], canRevisitOneSmallCave: Boolean): Set[Path] = {
-    if (pathSoFar.lastNode == "end") {
+  private def buildPaths(pathSoFar: Path, adjacencyMap: Map[Cave, Set[Cave]], canRevisitOneSmallCave: Boolean): Set[Path] = {
+    if (pathSoFar.lastNode == Cave("end")) {
       Set(pathSoFar)
     } else {
-      val nextNodes = adjacencyMap(pathSoFar.lastNode).filter(node => {
-        (node.toLowerCase != node)
-          || !pathSoFar.visited(node)
-          || (canRevisitOneSmallCave && !pathSoFar.hasRevisitedSmallCave() && node != "start")
-      })
-
-      nextNodes
-        .flatMap(node => findPathsRecursive(pathSoFar.addNode(node), adjacencyMap, canRevisitOneSmallCave))
+      adjacencyMap(pathSoFar.lastNode)
+        .filter(cave => {
+          (!cave.isSmall)
+            || !pathSoFar.visited(cave)
+            || (canRevisitOneSmallCave && !pathSoFar.hasRevisitedSmallCave && cave != Cave("start"))
+        })
+        .flatMap(node => buildPaths(pathSoFar.addNode(node), adjacencyMap, canRevisitOneSmallCave))
     }
   }
 
-  def buildAdjacencyMap(connections: Seq[Connection]): Map[String, Set[String]] = {
+  def buildAdjacencyMap(connections: Seq[Connection]): Map[Cave, Set[Cave]] = {
     connections
-      .foldLeft(Map[String, Set[String]]())((mapSoFar, connection) =>
+      .foldLeft(Map[Cave, Set[Cave]]())((mapSoFar, connection) =>
         mapSoFar
           .updatedWith(connection.start)(_.map(_ + connection.end).orElse(Some(Set(connection.end))))
           .updatedWith(connection.end)(_.map(_ + connection.start).orElse(Some(Set(connection.start))))
