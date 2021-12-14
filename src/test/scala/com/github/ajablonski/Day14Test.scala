@@ -32,7 +32,7 @@ class Day14Test extends AnyFlatSpec with Matchers with AocTestData(14) {
       "BC -> B",
       "CC -> N",
       "CN -> C"
-    )) shouldBe ((Map("NN" -> 1, "NC" -> 1, "CB" -> 1), "CB"), Map(
+    )) shouldBe ((Map("NN" -> 1, "NC" -> 1, "CB" -> 1), 'B'), Map(
       "CH" -> "B",
       "HH" -> "N",
       "CB" -> "H",
@@ -53,60 +53,60 @@ class Day14Test extends AnyFlatSpec with Matchers with AocTestData(14) {
   }
 
   "step" should "apply all rules to extend string" in {
-    Day14.step(Map("NN" -> 1, "NC" -> 1, "CB" -> 1), "CB", Map(
-      "CH" -> "B",
-      "HH" -> "N",
-      "CB" -> "H",
-      "NH" -> "C",
-      "HB" -> "C",
-      "HC" -> "B",
-      "HN" -> "C",
-      "NN" -> "C",
-      "BH" -> "H",
-      "NC" -> "B",
-      "NB" -> "B",
-      "BN" -> "B",
-      "BB" -> "N",
-      "BC" -> "B",
-      "CC" -> "N",
-      "CN" -> "C"
-    )) shouldBe {
-      (Map(
+    Day14.step(Map("NN" -> 1, "NC" -> 1, "CB" -> 1), Map(
+          "CH" -> "B",
+          "HH" -> "N",
+          "CB" -> "H",
+          "NH" -> "C",
+          "HB" -> "C",
+          "HC" -> "B",
+          "HN" -> "C",
+          "NN" -> "C",
+          "BH" -> "H",
+          "NC" -> "B",
+          "NB" -> "B",
+          "BN" -> "B",
+          "BB" -> "N",
+          "BC" -> "B",
+          "CC" -> "N",
+          "CN" -> "C"
+        )) shouldBe {
+      Map(
         "NC" -> 1,
         "CN" -> 1,
         "NB" -> 1,
         "BC" -> 1,
         "CH" -> 1,
         "HB" -> 1
-      ), "HB")
+      )
     }
   }
 
   it should "work when entry appears multiple times" in {
-    Day14.stepN(Map("NN" -> 1, "NC" -> 1, "CB" -> 1), "CB", Map(
-      "CH" -> "B",
-      "HH" -> "N",
-      "CB" -> "H",
-      "NH" -> "C",
-      "HB" -> "C",
-      "HC" -> "B",
-      "HN" -> "C",
-      "NN" -> "C",
-      "BH" -> "H",
-      "NC" -> "B",
-      "NB" -> "B",
-      "BN" -> "B",
-      "BB" -> "N",
-      "BC" -> "B",
-      "CC" -> "N",
-      "CN" -> "C"
-    ), 2) shouldBe (Map("NB" -> 2,
+    Day14.stepN(Map("NN" -> 1, "NC" -> 1, "CB" -> 1), Map(
+          "CH" -> "B",
+          "HH" -> "N",
+          "CB" -> "H",
+          "NH" -> "C",
+          "HB" -> "C",
+          "HC" -> "B",
+          "HN" -> "C",
+          "NN" -> "C",
+          "BH" -> "H",
+          "NC" -> "B",
+          "NB" -> "B",
+          "BN" -> "B",
+          "BB" -> "N",
+          "BC" -> "B",
+          "CC" -> "N",
+          "CN" -> "C"
+        ), 2) shouldBe Map("NB" -> 2,
     "BC" -> 2,
     "CC" -> 1,
     "CN" -> 1,
     "BB" -> 2,
     "CB" -> 2,
     "BH" -> 1,
-    "HC" -> 1), "CB")
+    "HC" -> 1)
   }
 }
