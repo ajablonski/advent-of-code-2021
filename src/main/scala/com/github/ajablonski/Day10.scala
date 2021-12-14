@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import com.github.ajablonski.day_10._
 
 
-object Day10 extends AocProblem[Long] {
+object Day10 extends AocProblem[Long, Long] {
 
   import com.github.ajablonski.day_10.Chunk.stringToChunkChar
   import ChunkExtensions._

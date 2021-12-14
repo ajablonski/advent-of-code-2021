@@ -4,7 +4,7 @@ import com.github.ajablonski.day_12.{Connection, Path, Cave}
 
 import scala.annotation.tailrec
 
-object Day12 extends AocProblem[Int] {
+object Day12 extends AocProblem[Int, Int] {
   override def part1(filename: String): Int = {
     findPaths(parse(getRawData(filename))).size
   }

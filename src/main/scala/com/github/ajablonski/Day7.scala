@@ -1,6 +1,6 @@
 package com.github.ajablonski
 
-object Day7 extends AocProblem[Int] {
+object Day7 extends AocProblem[Int, Int] {
   val part1CostFunction: (Int, Int) => Int = (index: Int, finalIndex: Int) => {
     Math.abs(finalIndex - index)
   }

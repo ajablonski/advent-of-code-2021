@@ -3,7 +3,7 @@ package com.github.ajablonski
 import scala.io.Source
 import scala.util.Using
 
-abstract class AocProblem[T] {
+abstract class AocProblem[T1, T2] {
   def main(args: Array[String]): Unit = {
     println("Part 1")
     println(profile(part1(args(0))))
@@ -19,9 +19,9 @@ abstract class AocProblem[T] {
     result
   }
 
-  def part1(filename: String): T
+  def part1(filename: String): T1
 
-  def part2(filename: String): T
+  def part2(filename: String): T2
 
   def getRawData(filename: String): Seq[String] =
     Using(Source.fromFile(filename)) {

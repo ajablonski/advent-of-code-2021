@@ -2,7 +2,7 @@ package com.github.ajablonski
 
 import com.github.ajablonski.day_8.DigitFinders
 
-object Day8 extends AocProblem[Int] {
+object Day8 extends AocProblem[Int, Int] {
   override def part1(filename: String): Int = {
     getRawData(filename)
       .flatMap(line => decodeLine(line).split(""))

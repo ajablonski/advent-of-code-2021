@@ -3,7 +3,7 @@ package com.github.ajablonski
 import com.github.ajablonski.day_4.BingoGame
 import com.github.ajablonski.day_4.BingoGame.{play, playToLastBoard}
 
-object Day4 extends AocProblem[Int] {
+object Day4 extends AocProblem[Int, Int] {
   override def part1(filename: String): Int = {
     val finishedBingoGame = play(BingoGame.parse(getRawData(filename)))
     (for (

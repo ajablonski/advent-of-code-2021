@@ -2,7 +2,7 @@ package com.github.ajablonski
 
 import com.github.ajablonski.day_5.{DiagonalLine, HorizontalLine, Line, Seafloor, VerticalLine}
 
-object Day5 extends AocProblem[Int] {
+object Day5 extends AocProblem[Int, Int] {
   override def part1(filename: String): Int = {
     findSeafloorSpotsWithMultipleVents(filename, (floor, line) => floor.mark(line))
   }

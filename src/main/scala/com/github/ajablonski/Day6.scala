@@ -1,6 +1,6 @@
 package com.github.ajablonski
 
-object Day6 extends AocProblem[Long] {
+object Day6 extends AocProblem[Long, Long] {
   override def part1(filename: String): Long = {
     agePopulationFromFile(filename, 80).sum
   }

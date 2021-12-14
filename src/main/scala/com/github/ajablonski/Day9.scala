@@ -2,7 +2,7 @@ package com.github.ajablonski
 
 import scala.annotation.tailrec
 
-object Day9 extends AocProblem[Int] {
+object Day9 extends AocProblem[Int, Int] {
   private val MaxDepth = 9
 
   override def part1(filename: String): Int = {
