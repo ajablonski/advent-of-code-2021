@@ -3,6 +3,7 @@ package com.github.ajablonski
 import com.github.ajablonski.util.NumberGrid
 
 import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.util.Try
 
 object Day15 extends AocProblem[Int, Int] {
@@ -27,10 +28,10 @@ object Day15 extends AocProblem[Int, Int] {
   }
 
   def findLeastRiskPath(riskMap: Map[(Int, Int), Int]): Seq[((Int, Int), Int)] = {
-    dijkstraShortedPath(riskMap,
+    dijkstraShortestPath(riskMap,
       riskMap.map((k, v) => k -> (if (k == start) 0 else Int.MaxValue)),
       riskMap.map((k, v) => k -> None),
-      riskMap.keySet,
+      mutable.PriorityQueue[(Int, (Int, Int))]((0, start))((a, b) => b._1.compareTo(a._1)),
       riskMap.keySet.max)
   }
 
@@ -51,34 +52,36 @@ object Day15 extends AocProblem[Int, Int] {
   }
 
   @tailrec
-  private def dijkstraShortedPath(riskMap: Map[(Int, Int), Int],
+  private def dijkstraShortestPath(riskMap: Map[(Int, Int), Int],
                                   distanceMap: Map[(Int, Int), Int],
                                   previousNodeMap: Map[(Int, Int), Option[(Int, Int)]],
-                                  unvisited: Set[(Int, Int)],
+                                  unvisited: mutable.PriorityQueue[(Int, (Int, Int))],
                                   destination: (Int, Int))
   : Seq[((Int, Int), Int)] = {
-    val closestPoint = distanceMap.filter((k, v) => unvisited.contains(k)).minBy(_._2)._1
-    if (unvisited.isEmpty || closestPoint == destination) {
+    if (unvisited.isEmpty || unvisited.headOption.map(_._2).contains(destination)) {
       tracePathFromEndToStart(riskMap, previousNodeMap, Seq(destination -> riskMap(destination)))
     } else {
+      val closestPoint = unvisited.dequeue()._2
+
       val adjacentCellsToCheck = riskMap
         .findAdjacentPoints(closestPoint)
         .map(_._1)
-        .intersect(unvisited)
 
-      val (newDistanceMap, newPreviousNodeMap) = adjacentCellsToCheck
-        .foldLeft((distanceMap, previousNodeMap)) {
-          case ((distanceMap, previousNodeMap), cell) =>
+      val (newDistanceMap, newPreviousNodeMap, newUnvisited) = adjacentCellsToCheck
+        .foldLeft((distanceMap, previousNodeMap, unvisited)) {
+          case ((distanceMap, previousNodeMap, unvisited), cell) =>
             val alt = distanceMap(closestPoint) + riskMap(cell)
             if (alt < distanceMap(cell)) {
               (distanceMap.updated(cell, alt),
-                previousNodeMap.updated(cell, Some(closestPoint)))
+                previousNodeMap.updated(cell, Some(closestPoint)),
+                if (!unvisited.exists(_._2 == cell)) unvisited.addOne((alt, cell)) else unvisited)
             } else {
-              (distanceMap, previousNodeMap)
+              (distanceMap, previousNodeMap, unvisited)
             }
         }
-      dijkstraShortedPath(riskMap, newDistanceMap, newPreviousNodeMap, unvisited - closestPoint, destination)
+      dijkstraShortestPath(riskMap, newDistanceMap, newPreviousNodeMap, newUnvisited, destination)
     }
+
   }
 
   @tailrec
