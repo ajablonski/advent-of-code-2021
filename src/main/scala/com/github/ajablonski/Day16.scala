@@ -60,31 +60,41 @@ object Day16 extends AocProblem[Int, Int] {
   }
 }
 
-sealed trait Packet(version: Long, typeId: String) {
+sealed trait Packet(version: Long) {
+  def getValue: Long
 }
 
-case class LiteralPacket(version: Long, value: Long) extends Packet(version, "100") {
+case class LiteralPacket(version: Long, value: Long) extends Packet(version) {
+  override def getValue: Long = value
 }
 
-class OperatorPacket(val version: Long, val typeId: String, val subpackets: Seq[Packet]) extends Packet(version, typeId) {
-  def canEqual(other: Any): Boolean = other.isInstanceOf[OperatorPacket]
-
-  override def equals(other: Any): Boolean = other match {
-    case that: OperatorPacket =>
-      that.canEqual(this) &&
-        version == that.version &&
-        typeId == that.typeId &&
-        subpackets == that.subpackets
-    case _ => false
-  }
-
-  override def hashCode(): Int = {
-    val state = Seq(version, typeId, subpackets)
-    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
-  }
+sealed abstract class OperatorPacket(val version: Long, val subpackets: Seq[Packet]) extends Packet(version) {
+  override def getValue: Long = 0
 }
+
+case class SumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
+case class ProductOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
+case class MinimumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
+case class MaximumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
+case class GreaterThanOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
+case class LessThanOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
+case class EqualToOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
 
 object OperatorPacket {
+  private val typeIdToFunctionMap: Map[String, (Long, Seq[Packet]) => OperatorPacket] = Map(
+    "000" -> SumOperatorPacket.apply,
+    "001" -> ProductOperatorPacket.apply,
+    "010" -> MinimumOperatorPacket.apply,
+    "011" -> MaximumOperatorPacket.apply,
+    "101" -> GreaterThanOperatorPacket.apply,
+    "110" -> LessThanOperatorPacket.apply,
+    "111" -> EqualToOperatorPacket.apply
+  )
+
+  def apply(version: Long, typeId: String, packets: Seq[Packet]): OperatorPacket = {
+    typeIdToFunctionMap(typeId).apply(version, packets)
+  }
+
   def unapply(op: OperatorPacket): (Long, Seq[Packet]) = {
     (op.version, op.subpackets)
   }
