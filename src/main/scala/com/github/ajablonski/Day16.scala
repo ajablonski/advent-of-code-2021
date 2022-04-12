@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.runtime.RichInt
 import java.lang.Long as JLong
 
-object Day16 extends AocProblem[Int, Int] {
+object Day16 extends AocProblem[Int, Long] {
   private val literalPacketRegex = raw"([01]{3})100((?:1[01]{4})*0[01]{4})([01]*)".r
   private val operatorPacketBitLength = raw"([01]{3})([01]{3})0([01]{15})([01]*)".r
   private val operatorPacketSubpacketCountLength = raw"([01]{3})([01]{3})1([01]{11})([01]*)".r
@@ -19,7 +19,15 @@ object Day16 extends AocProblem[Int, Int] {
     sumVersions(packet.head).toInt
   }
 
-  override def part2(filename: String): Int = ???
+  override def part2(filename: String): Long = {
+    import Day16.toBinary
+
+    val packetString = getRawData(filename).head.toBinary
+
+    val packet = parse(packetString)
+
+    packet.head.getValue
+  }
 
   def sumVersions(packet: Packet): Long = {
     packet match {
@@ -68,17 +76,29 @@ case class LiteralPacket(version: Long, value: Long) extends Packet(version) {
   override def getValue: Long = value
 }
 
-sealed abstract class OperatorPacket(val version: Long, val subpackets: Seq[Packet]) extends Packet(version) {
-  override def getValue: Long = 0
-}
+sealed abstract class OperatorPacket(val version: Long, val subpackets: Seq[Packet]) extends Packet(version)
 
-case class SumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
-case class ProductOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
-case class MinimumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
-case class MaximumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
-case class GreaterThanOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
-case class LessThanOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
-case class EqualToOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets)
+case class SumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets) {
+  override def getValue: Long = subpackets.map(_.getValue).sum
+}
+case class ProductOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets) {
+  override def getValue: Long = subpackets.map(_.getValue).product
+}
+case class MinimumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets) {
+  override def getValue: Long = subpackets.map(_.getValue).min
+}
+case class MaximumOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets) {
+  override def getValue: Long = subpackets.map(_.getValue).max
+}
+case class GreaterThanOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets) {
+  override def getValue: Long = if (subpackets.head.getValue > subpackets(1).getValue) 1 else 0
+}
+case class LessThanOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets) {
+  override def getValue: Long = if (subpackets.head.getValue < subpackets(1).getValue) 1 else 0
+}
+case class EqualToOperatorPacket(override val version: Long, override val subpackets: Seq[Packet]) extends OperatorPacket(version, subpackets) {
+  override def getValue: Long = if (subpackets.head.getValue == subpackets(1).getValue) 1 else 0
+}
 
 object OperatorPacket {
   private val typeIdToFunctionMap: Map[String, (Long, Seq[Packet]) => OperatorPacket] = Map(
