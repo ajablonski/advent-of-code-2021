@@ -2,9 +2,9 @@ name := "advent-of-code-2021"
 
 version := "0.1"
 
-scalaVersion := "3.1.0"
+scalaVersion := "3.1.2"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.10" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.11" % "test"
 
 val fetch = inputKey[File]("Fetches file with particular day's data")
 fetch := {
