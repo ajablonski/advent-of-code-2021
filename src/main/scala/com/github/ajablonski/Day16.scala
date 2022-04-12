@@ -5,7 +5,6 @@ import scala.runtime.RichInt
 import java.lang.Long as JLong
 
 object Day16 extends AocProblem[Int, Int] {
-  private val literalNumberDigitLength = 16
   private val literalPacketRegex = raw"([01]{3})100((?:1[01]{4})*0[01]{4})([01]*)".r
   private val operatorPacketBitLength = raw"([01]{3})([01]{3})0([01]{15})([01]*)".r
   private val operatorPacketSubpacketCountLength = raw"([01]{3})([01]{3})1([01]{11})([01]*)".r
@@ -25,8 +24,7 @@ object Day16 extends AocProblem[Int, Int] {
   def sumVersions(packet: Packet): Long = {
     packet match {
       case LiteralPacket(version, _) => version
-      case OperatorPacketBitLength(version, _, _, subpackets) => version + subpackets.map(sumVersions).sum
-      case OperatorPacketPacketCount(version, _, _, subpackets) => version + subpackets.map(sumVersions).sum
+      case OperatorPacket(version, subpackets) => version + subpackets.map(sumVersions).sum
     }
   }
 
@@ -37,11 +35,11 @@ object Day16 extends AocProblem[Int, Int] {
         LiteralPacket(versionPart.fromBinary, integer)
           +: parse(rest)
       case operatorPacketBitLength(versionPart, typePart, bitLength, rest) =>
-        OperatorPacketBitLength(versionPart.fromBinary, typePart, bitLength.fromBinary, parse(rest.take(bitLength.fromBinary.toInt)))
+        OperatorPacket(versionPart.fromBinary, typePart, parse(rest.take(bitLength.fromBinary.toInt)))
           +: parse(rest.drop(bitLength.fromBinary.toInt))
       case operatorPacketSubpacketCountLength(versionPart, typePart, subpacketCount, rest) =>
         val otherPackets = parse(rest)
-        OperatorPacketPacketCount(versionPart.fromBinary, typePart, subpacketCount.fromBinary, otherPackets.take(subpacketCount.fromBinary.toInt))
+        OperatorPacket(versionPart.fromBinary, typePart, otherPackets.take(subpacketCount.fromBinary.toInt))
           +: otherPackets.drop(subpacketCount.fromBinary.toInt)
       case trailing0s => Seq()
     }
@@ -63,17 +61,31 @@ object Day16 extends AocProblem[Int, Int] {
 }
 
 sealed trait Packet(version: Long, typeId: String) {
-  //  def toBinaryString: String
 }
 
 case class LiteralPacket(version: Long, value: Long) extends Packet(version, "100") {
-  //  override def toBinaryString: String = Seq(version.toBinaryString.padBinary(3), ).mkString
 }
 
-sealed abstract class OperatorPacket(version: Long, typeId: String, lengthTypeId: Byte, subpackets: Seq[Packet]) extends Packet(version, typeId)
+class OperatorPacket(val version: Long, val typeId: String, val subpackets: Seq[Packet]) extends Packet(version, typeId) {
+  def canEqual(other: Any): Boolean = other.isInstanceOf[OperatorPacket]
 
-case class OperatorPacketBitLength(version: Long, typeId: String, bitLength: Long, subpackets: Seq[Packet]) extends OperatorPacket(version, typeId, 0, subpackets) {
+  override def equals(other: Any): Boolean = other match {
+    case that: OperatorPacket =>
+      that.canEqual(this) &&
+        version == that.version &&
+        typeId == that.typeId &&
+        subpackets == that.subpackets
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(version, typeId, subpackets)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
-case class OperatorPacketPacketCount(version: Long, typeId: String, subpacketCount: Long, subpackets: Seq[Packet]) extends OperatorPacket(version, typeId, 1, subpackets) {
+object OperatorPacket {
+  def unapply(op: OperatorPacket): (Long, Seq[Packet]) = {
+    (op.version, op.subpackets)
+  }
 }
