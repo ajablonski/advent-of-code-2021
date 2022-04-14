@@ -3,6 +3,7 @@ package com.github.ajablonski
 import com.github.ajablonski.day_17.{BoundaryArea, TrenchState}
 
 import scala.annotation.tailrec
+import scala.math.{min, max, abs, sqrt}
 
 object Day17 extends AocProblem[Int, Int] {
   override def part1(filename: String): Int = {
@@ -17,19 +18,16 @@ object Day17 extends AocProblem[Int, Int] {
   }
 
   private def simulateSuccessfulInitialVelocities(boundaries: BoundaryArea): Seq[TrenchState] = {
-    val minAbsoluteXVelocity = ((1 + math.sqrt(1 + 8 * boundaries.xMin)) / 2).toInt
-    val xRange = (math.min(boundaries.xMin, minAbsoluteXVelocity)
-      to math.max(-minAbsoluteXVelocity, boundaries.xMax))
-    val minAbsoluteYVelocity = ((1 + math.sqrt(1 + 8 * boundaries.yMin)) / 2).toInt
-    val yRange = (math.min(boundaries.yMin, minAbsoluteYVelocity)
-      to math.max(math.abs(boundaries.yMin), math.abs(boundaries.yMax)))
-    xRange
-      .flatMap { vX =>
-        yRange.map { vY =>
-          simulate(TrenchState((0, 0), (vX, vY), boundaries))
-        }
-      }
-      .filter(_.hasBeenInBoundary)
+    val minAbsoluteXVelocity = ((1 + sqrt(1 + 8 * boundaries.xMin)) / 2).toInt
+    val xRange = (min(boundaries.xMin, minAbsoluteXVelocity)
+      to max(-minAbsoluteXVelocity, boundaries.xMax))
+    val minAbsoluteYVelocity = ((1 + sqrt(1 + 8 * boundaries.yMin)) / 2).toInt
+    val yRange = (min(boundaries.yMin, minAbsoluteYVelocity)
+      to max(abs(boundaries.yMin), abs(boundaries.yMax)))
+    for (vX <- xRange;
+         vY <- yRange;
+         finalState = simulate(TrenchState((0, 0), (vX, vY), boundaries)) if finalState.hasBeenInBoundary)
+    yield finalState
   }
 
   @tailrec
