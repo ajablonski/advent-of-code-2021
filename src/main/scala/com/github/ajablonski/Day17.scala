@@ -6,44 +6,35 @@ import scala.annotation.tailrec
 
 object Day17 extends AocProblem[Int, Int] {
   override def part1(filename: String): Int = {
-    val boundaries = getParsedData(filename)
-    val successfulSimulations = getPossibleInitialVelocities(boundaries)
-
-    successfulSimulations
-      .maxBy(_._2.getMaxHeight)
-      ._2.getMaxHeight
+    simulateSuccessfulInitialVelocities(getParsedData(filename))
+      .maxBy(_.getMaxHeight)
+      .getMaxHeight
   }
 
   override def part2(filename: String): Int = {
-    val boundaries = getParsedData(filename)
-    val successfulSimulations = getPossibleInitialVelocities(boundaries)
-
-    successfulSimulations
+    simulateSuccessfulInitialVelocities(getParsedData(filename))
       .size
   }
 
-  private def getPossibleInitialVelocities(boundaries: BoundaryArea): Seq[((Int, Int), TrenchState)] = {
-
-    val xRange = if (boundaries.xMin < 0 && boundaries.xMax > 0) {
-      boundaries.xMin to boundaries.xMax
-    } else if (boundaries.xMin >= 0) {
-      0 to boundaries.xMax
-    } else {
-      boundaries.xMin to 0
-    }
-    xRange.flatMap { vX =>
-      val extremeY = math.max(math.abs(boundaries.yMin), math.abs(boundaries.yMax))
-      (-extremeY to extremeY).map { vY =>
-        val initialVelocity = (vX, vY)
-        (initialVelocity, simulate(TrenchState((0, 0), initialVelocity, boundaries)))
+  private def simulateSuccessfulInitialVelocities(boundaries: BoundaryArea): Seq[TrenchState] = {
+    val minAbsoluteXVelocity = ((1 + math.sqrt(1 + 8 * boundaries.xMin)) / 2).toInt
+    val xRange = (math.min(boundaries.xMin, minAbsoluteXVelocity)
+      to math.max(-minAbsoluteXVelocity, boundaries.xMax))
+    val minAbsoluteYVelocity = ((1 + math.sqrt(1 + 8 * boundaries.yMin)) / 2).toInt
+    val yRange = (math.min(boundaries.yMin, minAbsoluteYVelocity)
+      to math.max(math.abs(boundaries.yMin), math.abs(boundaries.yMax)))
+    xRange
+      .flatMap { vX =>
+        yRange.map { vY =>
+          simulate(TrenchState((0, 0), (vX, vY), boundaries))
+        }
       }
-    }
-      .filter(_._2.hasBeenInBoundary)
+      .filter(_.hasBeenInBoundary)
   }
 
   @tailrec
   def simulate(trenchState: TrenchState): TrenchState = {
-    if (trenchState.isPastBoundary) trenchState else simulate(trenchState.step())
+    if (trenchState.isInBoundary || trenchState.isPastBoundary) trenchState else simulate(trenchState.step())
   }
 
   def getParsedData(filename: String): BoundaryArea = {
