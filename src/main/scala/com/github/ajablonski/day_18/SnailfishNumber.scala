@@ -1,6 +1,6 @@
 package com.github.ajablonski.day_18
 
-import com.github.ajablonski.day_18.SnailfishNumber.{MaxDepth, setParent, setParents}
+import com.github.ajablonski.day_18.SnailfishNumber.{MaxDepth, setParents}
 
 import scala.annotation.{tailrec, targetName}
 
@@ -8,7 +8,7 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
   private var parentInfo: Option[(SnailfishNumber, Boolean)] = None
 
   setParents(this)
-  
+
   override def toString: String = f"[$left,$right]"
 
   def getParent: Option[SnailfishNumber] = parentInfo.map(_._1)
@@ -46,8 +46,8 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
     } else if (maybeTooBigNode.isDefined) {
       maybeTooBigNode
         .map {
-          case node@SnailfishNumber(x: Int, right) if x > 9 => node.replaceMeWith(SnailfishNumber(left = SnailfishNumber(x / 2, (x + 1) / 2), right = right))
-          case node@SnailfishNumber(left, y: Int) if y > 9 => node.replaceMeWith(SnailfishNumber(left = left, right = SnailfishNumber(y / 2, (y + 1) / 2)))
+          case node@SnailfishNumber(x: Int, right) if x > 9 => node.replaceMeWith(node.copy(left = SnailfishNumber(x / 2, (x + 1) / 2)))
+          case node@SnailfishNumber(left, y: Int) if y > 9 => node.replaceMeWith(node.copy(right = SnailfishNumber(y / 2, (y + 1) / 2)))
           case SnailfishNumber(_, _) => throw Exception("Did not expect to receive SnailfishNumber needing splitting but with neither element an integer over 9")
         }
         .get
@@ -86,8 +86,8 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
 
   def addFromRightChild(value: Int, child: SnailfishNumber): SnailfishNumber = {
     left match {
-      case x: Int => this.replaceMeWith(SnailfishNumber(left = x + value, right = right))
-      case l: SnailfishNumber if l != child => this.replaceMeWith(SnailfishNumber(left = l.addToRightChild(value), right = right))
+      case x: Int => this.replaceMeWith(copy(left = x + value))
+      case l: SnailfishNumber if l != child => this.replaceMeWith(copy(left = l.addToRightChild(value)))
       case l: SnailfishNumber if l == child =>
         this.getParent match {
           case Some(parent) => parent.addFromRightChild(value, this)
@@ -98,41 +98,38 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
 
   def addFromLeftChild(value: Int, child: SnailfishNumber): SnailfishNumber = {
     right match {
-      case x: Int => this.replaceMeWith(SnailfishNumber(left = left, right = x + value))
+      case x: Int => this.replaceMeWith(copy(right = x + value))
       case r: SnailfishNumber if r == child && r.parentInfo == child.parentInfo =>
         this.getParent match {
           case Some(parent) => parent.addFromLeftChild(value, this)
           case None => this
         }
-      case r: SnailfishNumber => this.replaceMeWith(SnailfishNumber(left = left, right = r.addToLeftChild(value)))
+      case r: SnailfishNumber => this.replaceMeWith(copy(right = r.addToLeftChild(value)))
     }
   }
 
   def addToLeftChild(value: Int): SnailfishNumber = {
-    this match {
-      case SnailfishNumber(x: Int, _) => SnailfishNumber(left = x + value, right = right)
-      case SnailfishNumber(l: SnailfishNumber, _) => SnailfishNumber(left = l.addToLeftChild(value), right = right)
+    left match {
+      case x: Int => copy(left = x + value)
+      case l: SnailfishNumber => copy(left = l.addToLeftChild(value))
     }
   }
 
   def addToRightChild(value: Int): SnailfishNumber = {
-    this match {
-      case SnailfishNumber(_, x: Int) => SnailfishNumber(left = left, right = x + value)
-      case SnailfishNumber(_, r: SnailfishNumber) => SnailfishNumber(left = left, right = r.addToRightChild(value))
+    right match {
+      case x: Int => copy(right = x + value)
+      case r: SnailfishNumber => copy(right = r.addToRightChild(value))
     }
   }
 
   @tailrec
   final def replaceMeWith(value: Int | SnailfishNumber): SnailfishNumber = {
     parentInfo match {
-      case Some((parent, true)) => parent.replaceMeWith(SnailfishNumber(left = value, right = parent.right))
-      case Some((parent, false)) => parent.replaceMeWith(SnailfishNumber(left = parent.left, right = value))
+      case Some((parent, true)) => parent.replaceMeWith(parent.copy(left = value))
+      case Some((parent, false)) => parent.replaceMeWith(parent.copy(right = value))
       case None =>
         value match {
-          case x: SnailfishNumber =>
-            val returnValue = x.copy()
-            setParents(returnValue)
-            returnValue
+          case x: SnailfishNumber => x
           case _: Int =>
             throw Exception("Attempting to replace a root Snailfish node with an integer")
         }
@@ -143,26 +140,22 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
 object SnailfishNumber {
   val MaxDepth: Int = 4
 
-  private def setParent(item: Int | SnailfishNumber, parent: SnailfishNumber, isLeftChild: Boolean): Unit = {
-    item match {
-      case _: Int =>
-      case x: SnailfishNumber =>
-        x.parentInfo = Some((parent, isLeftChild))
-    }
-  }
-
   private def setParents(sfn: SnailfishNumber): Unit = {
-    setParent(sfn.left, sfn, true)
-    setParent(sfn.right, sfn, false)
 
     sfn.left match {
       case _: Int =>
-      case x: SnailfishNumber => setParents(x)
+      case x: SnailfishNumber => {
+        x.parentInfo = Some((sfn, true))
+        setParents(x)
+      }
     }
 
     sfn.right match {
       case _: Int =>
-      case x: SnailfishNumber => setParents(x)
+      case x: SnailfishNumber => {
+        x.parentInfo = Some((sfn, false))
+        setParents(x)
+      }
     }
   }
 }
