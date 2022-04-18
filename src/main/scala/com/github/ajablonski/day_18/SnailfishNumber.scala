@@ -1,6 +1,6 @@
 package com.github.ajablonski.day_18
 
-import com.github.ajablonski.day_18.SnailfishNumber.{setParent, setParents}
+import com.github.ajablonski.day_18.SnailfishNumber.{MaxDepth, setParent, setParents}
 
 import scala.annotation.{tailrec, targetName}
 
@@ -8,8 +8,7 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
   private var parentInfo: Option[(SnailfishNumber, Boolean)] = None
 
   setParents(this)
-
-
+  
   override def toString: String = f"[$left,$right]"
 
   def getParent: Option[SnailfishNumber] = parentInfo.map(_._1)
@@ -30,29 +29,22 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
     SnailfishNumber(this, other).reduced
   }
 
-  def depth: Int = {
-    (left, right) match {
-      case (_: Int, _: Int) => 1
-      case (x: SnailfishNumber, _: Int) => x.depth + 1
-      case (_: Int, y: SnailfishNumber) => y.depth + 1
-      case (x: SnailfishNumber, y: SnailfishNumber) => math.max(x.depth, y.depth) + 1
-    }
-  }
-
   def reduce(): SnailfishNumber = {
-    if (depth > 4) {
-      val afterLeftAddition = findFirstAtDepth(5)
+    val maybeTooDeepNode = findFirstAtDepth(MaxDepth + 1)
+    val maybeTooBigNode = findFirstNeedingSplit()
+    if (maybeTooDeepNode.isDefined) {
+      val afterLeftAddition = maybeTooDeepNode
         .map(node => node.getParent.get.addFromRightChild(node.left.asInstanceOf[Int], node))
       val afterRightAddition = afterLeftAddition
-        .flatMap(_.findFirstAtDepth(5))
+        .flatMap(_.findFirstAtDepth(MaxDepth + 1))
         .map(node => node.getParent.get.addFromLeftChild(node.right.asInstanceOf[Int], node))
       val afterReplacement = afterRightAddition
-        .flatMap(_.findFirstAtDepth(5))
+        .flatMap(_.findFirstAtDepth(MaxDepth + 1))
         .map(_.replaceMeWith(0))
       afterReplacement
         .get
-    } else if (findFirstNeedingSplit().isDefined) {
-      findFirstNeedingSplit()
+    } else if (maybeTooBigNode.isDefined) {
+      maybeTooBigNode
         .map {
           case node@SnailfishNumber(x: Int, right) if x > 9 => node.replaceMeWith(SnailfishNumber(left = SnailfishNumber(x / 2, (x + 1) / 2), right = right))
           case node@SnailfishNumber(left, y: Int) if y > 9 => node.replaceMeWith(SnailfishNumber(left = left, right = SnailfishNumber(y / 2, (y + 1) / 2)))
@@ -149,6 +141,8 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
 }
 
 object SnailfishNumber {
+  val MaxDepth: Int = 4
+
   private def setParent(item: Int | SnailfishNumber, parent: SnailfishNumber, isLeftChild: Boolean): Unit = {
     item match {
       case _: Int =>

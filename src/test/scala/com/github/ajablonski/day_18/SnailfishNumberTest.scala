@@ -62,16 +62,6 @@ class SnailfishNumberTest extends AnyFunSpec with should.Matchers {
     }
   }
 
-  describe("depth") {
-    it("should return the maximum depth of the number") {
-      SNF(1, 2).depth shouldBe 1
-      SNF(SNF(1, 2), 1).depth shouldBe 2
-      SNF(1, SNF(1, 2)).depth shouldBe 2
-      SNF(SNF(1, 2), SNF(1, 2)).depth shouldBe 2
-      SNF(SNF(SNF(1, 2), 2), SNF(1, 2)).depth shouldBe 3
-    }
-  }
-
   describe("reduce") {
     it("should return the same number if already reduced") {
       val original = SNF(SNF(SNF(SNF(2, 1), 2), 3), 4)
