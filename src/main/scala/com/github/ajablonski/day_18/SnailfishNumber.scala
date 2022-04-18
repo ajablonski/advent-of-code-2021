@@ -30,29 +30,29 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
   }
 
   def reduce(): SnailfishNumber = {
-    val maybeTooDeepNode = findFirstAtDepth(MaxDepth + 1)
-    val maybeTooBigNode = findFirstNeedingSplit()
-    if (maybeTooDeepNode.isDefined) {
-      val afterLeftAddition = maybeTooDeepNode
-        .map(node => node.getParent.get.addFromRightChild(node.left.asInstanceOf[Int], node))
-      val afterRightAddition = afterLeftAddition
-        .flatMap(_.findFirstAtDepth(MaxDepth + 1))
-        .map(node => node.getParent.get.addFromLeftChild(node.right.asInstanceOf[Int], node))
-      val afterReplacement = afterRightAddition
-        .flatMap(_.findFirstAtDepth(MaxDepth + 1))
-        .map(_.replaceMeWith(0))
-      afterReplacement
-        .get
-    } else if (maybeTooBigNode.isDefined) {
-      maybeTooBigNode
-        .map {
-          case node@SnailfishNumber(x: Int, _) if x > 9 => node.replaceMeWith(node.copy(left = SnailfishNumber(x / 2, (x + 1) / 2)))
-          case node@SnailfishNumber(_, y: Int) if y > 9 => node.replaceMeWith(node.copy(right = SnailfishNumber(y / 2, (y + 1) / 2)))
-          case SnailfishNumber(_, _) => throw Exception("Did not expect to receive SnailfishNumber needing splitting but with neither element an integer over 9")
-        }
-        .get
-    } else {
-      this
+    findFirstNeedingExplode()
+      .flatMap(_.explodeFromNode())
+      .orElse {
+        findFirstNeedingSplit()
+          .map(_.splitFromNode())
+      }
+      .getOrElse(this)
+  }
+
+  def explodeFromNode(): Option[SnailfishNumber] = {
+    val (leftVal, rightVal) = (left.asInstanceOf[Int], right.asInstanceOf[Int])
+    getParent.get.addFromRightChild(leftVal, this)
+      .findFirstNeedingExplode()
+      .map(node => node.getParent.get.addFromLeftChild(rightVal, node))
+      .flatMap(_.findFirstNeedingExplode())
+      .map(_.replaceMeWith(0))
+  }
+
+  def splitFromNode(): SnailfishNumber = {
+    this match {
+      case SnailfishNumber(x: Int, _) if x > 9 => replaceMeWith(copy(left = SnailfishNumber(x / 2, (x + 1) / 2)))
+      case SnailfishNumber(_, y: Int) if y > 9 => replaceMeWith(copy(right = SnailfishNumber(y / 2, (y + 1) / 2)))
+      case SnailfishNumber(_, _) => throw Exception("Did not expect to receive SnailfishNumber needing splitting but with neither element an integer over 9")
     }
   }
 
@@ -65,6 +65,8 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
       reducedOnce.reduced
     }
   }
+
+  def findFirstNeedingExplode() = findFirstAtDepth(MaxDepth + 1)
 
   def findFirstAtDepth(depth: Int): Option[SnailfishNumber] = {
     (left, right) match {
