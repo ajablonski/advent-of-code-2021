@@ -46,8 +46,8 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
     } else if (maybeTooBigNode.isDefined) {
       maybeTooBigNode
         .map {
-          case node@SnailfishNumber(x: Int, right) if x > 9 => node.replaceMeWith(node.copy(left = SnailfishNumber(x / 2, (x + 1) / 2)))
-          case node@SnailfishNumber(left, y: Int) if y > 9 => node.replaceMeWith(node.copy(right = SnailfishNumber(y / 2, (y + 1) / 2)))
+          case node@SnailfishNumber(x: Int, _) if x > 9 => node.replaceMeWith(node.copy(left = SnailfishNumber(x / 2, (x + 1) / 2)))
+          case node@SnailfishNumber(_, y: Int) if y > 9 => node.replaceMeWith(node.copy(right = SnailfishNumber(y / 2, (y + 1) / 2)))
           case SnailfishNumber(_, _) => throw Exception("Did not expect to receive SnailfishNumber needing splitting but with neither element an integer over 9")
         }
         .get
@@ -87,12 +87,12 @@ case class SnailfishNumber(left: SnailfishNumber | Int, right: SnailfishNumber |
   def addFromRightChild(value: Int, child: SnailfishNumber): SnailfishNumber = {
     left match {
       case x: Int => this.replaceMeWith(copy(left = x + value))
-      case l: SnailfishNumber if l != child => this.replaceMeWith(copy(left = l.addToRightChild(value)))
-      case l: SnailfishNumber if l == child =>
+      case l: SnailfishNumber if l == child && l.parentInfo == child.parentInfo =>
         this.getParent match {
           case Some(parent) => parent.addFromRightChild(value, this)
           case None => this
         }
+      case l: SnailfishNumber => this.replaceMeWith(copy(left = l.addToRightChild(value)))
     }
   }
 
